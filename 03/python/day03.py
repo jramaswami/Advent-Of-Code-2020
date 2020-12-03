@@ -9,21 +9,21 @@ import pyperclip
 
 def main():
     slope_tree_cells = [[0 for _ in range(8)] for _ in range(3)]
-    slope_col_indices = [[0 for _ in range(8)] for _ in range(3)]
 
     for row_index, row in enumerate(sys.stdin):
         col_count = len(row.strip())
         for slope_col in range(8):
             # Count the trees.
-            for k in range(1,3):
-                if row_index % k == 0:
-                    slope_col_index = slope_col_indices[k][slope_col]
-                    slope_tree_cells[k][slope_col] += (row[slope_col_index] == '#')
-
-            # Update the index.
-            for k in range(1,3):
-                if row_index % k == 0:
-                    slope_col_indices[k][slope_col] = (slope_col_indices[k][slope_col] + slope_col) % col_count
+            for slope_row in range(1,3):
+                if row_index % slope_row == 0:
+                    # For the slope with this row index the skier wiould have
+                    # updated their column position actual row_index // k
+                    # times.  Since we started at column 0, that means their
+                    # position is (row_index // k) * slope_col.  Take the
+                    # remainder of that column divided by the number of columns
+                    # to get the contents of the cell.
+                    slope_col_index = ((row_index // slope_row) * slope_col) % col_count
+                    slope_tree_cells[slope_row][slope_col] += (row[slope_col_index] == '#')
 
     soln1 = slope_tree_cells[1][3]
     print('Solution to part 1 is', soln1)
