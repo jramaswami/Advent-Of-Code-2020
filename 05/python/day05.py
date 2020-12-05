@@ -47,9 +47,27 @@ def binary_search(boarding_pass):
     return row, col
 
 
+def binary_bp(boarding_pass):
+    """
+    Alternate (better) solution to convert convert boarding pass to row, col.
+    """
+    row = 0
+    col = 0
+    for c in boarding_pass:
+        if c == 'F':
+            row = row << 1
+        elif c == 'B':
+            row = (row << 1) | 1
+        elif c == 'L':
+            col = (col << 1)
+        elif c == 'R':
+            col = (col << 1) | 1
+    return row, col
+
+
 def seat_id(boarding_pass):
     """Return unique seat id for boarding pass."""
-    row, col = binary_search(boarding_pass)
+    row, col = binary_bp(boarding_pass)
     return (row * 8) + col
 
 
@@ -78,6 +96,13 @@ def test_binary_search():
     assert binary_search("FFFBBBFRRR") == (14, 7)
     assert binary_search("BBFFBBFRLL") == (102, 4)
 
+
+def test_binary_bp():
+    """Test binary_bp() function."""
+    assert binary_bp("FBFBBFFRLR") == (44, 5)
+    assert binary_bp("BFFFBBFRRR") == (70, 7)
+    assert binary_bp("FFFBBBFRRR") == (14, 7)
+    assert binary_bp("BBFFBBFRLL") == (102, 4)
 
 def test_seat_id():
     """Test seat_id() function."""
