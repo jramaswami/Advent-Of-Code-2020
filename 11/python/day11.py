@@ -84,10 +84,11 @@ def main():
     seats = [[c for c in line.strip()] for line in sys.stdin]
     soln1 = solve([list(row) for row in seats], eight_neighbors, 4)
     print('The solution to part 1 is', soln1)
-    # assert soln == 2265
+    assert soln1 == 2265
     soln2 = solve([list(row) for row in seats], visible_neighbors, 5)
     print('The solution to part 2 is', soln2)
     pyperclip.copy(soln2)
+    assert soln2 == 2045
 
 
 if __name__ == '__main__':
