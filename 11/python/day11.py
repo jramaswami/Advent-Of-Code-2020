@@ -36,7 +36,6 @@ def visible_neighbors(row, col, seats):
                 keep_looking = False
 
 
-
 def next_state(row, col, seats, neighbor_fn, seat_death):
     """Return the next state of the cell at (row, col)."""
     occupied_neighbors = sum(neighbor == '#' for neighbor
