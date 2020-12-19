@@ -3,77 +3,73 @@ Advent of Code 2020 :: Day 19: Monster Messages
 """
 import sys
 import pyperclip
-from parsimonious import Grammar
-from parsimonious.exceptions import ParseError
+from lark import Lark
 
 
-def peg_translate(t):
-    """Translate token for use in PEG grammar."""
-    if t == "|":
-        return "/"
+def translate(t):
+    """Translate token for use in grammar."""
     if t.isdigit():
         return f"RULE_{t}"
     return t
+
 
 def main():
     """Main program."""
     line = sys.stdin.readline().strip()
     rules = dict()
+    rule_max = 0
     while line:
         tokens = line.split(': ')
         rules[tokens[0]] = tokens[1].strip().split()
         line = sys.stdin.readline().strip()
+        rule_max = max(int(tokens[0]), rule_max)
 
     messages = []
     for line in sys.stdin:
         messages.append(line.strip())
 
-    peg_rules1 = []
-    peg_rules2 = []
+    # Part 1
+    grammar_rules = ["" for _ in range(rule_max+1)]
     for r, t in rules.items():
+        rule_max = max(int(r), rule_max)
         if '|' in t:
             i = t.index('|')
             tl, tr = t[:i], t[i+1:]
-            t0 = "(" + " ".join(peg_translate(e) for e in tl) + ") / (" + " ".join(peg_translate(e) for e in tr) + ")"
+            t0 = ("(" + " ".join(translate(e) for e in tl) + ") | (" 
+                 + " ".join(translate(e) for e in tr) + ")")
         else:
-            t0 = " ".join(peg_translate(e) for e in t)
-        peg_rules1.append(f"RULE_{r} = {t0}")
+            t0 = " ".join(translate(e) for e in t)
+        if r == '0':
+            grammar_rules[int(r)] = f"start: {t0}"
+        else:
+            grammar_rules[int(r)] = f"RULE_{r}: {t0}"
 
-        # Part 2
-        if r == '8':
-            t0 = "RULE_42 / (RULE_42 RULE_8)"
-        if r == '11':
-            t0 = "(RULE_42 RULE_31) / (RULE_42 RULE_11 RULE_31)"
-        peg_rules2.append(f"RULE_{r} = {t0}")
-
-    print('part 1')
-    print("\n".join(peg_rules1))
-    grammar1 = Grammar("\n".join(peg_rules1))
-    grammar2 = Grammar("\n".join(peg_rules2))
-    
+    parser1 = Lark("\n".join(t for t in grammar_rules if t))
     soln1 = 0
     for m in messages:
         try:
-            grammar1['RULE_0'].parse(m)
+            parser1.parse(m)
             soln1 += 1
-        except ParseError as pe:
+        except: 
             pass
     print(f"The solution to part 1 is {soln1}.")
+    assert soln1 == 124
 
-    print('part 2')
-    print("\n".join(peg_rules2))
+    # Part 2
+    grammar_rules[0] = "start: rule_8 rule_11"
+    grammar_rules[8] = "rule_8: [rule_8] RULE_42"
+    grammar_rules[11] = "rule_11: RULE_42 [rule_11] RULE_31"
+    parser2 = Lark("\n".join(t for t in grammar_rules if t))
     soln2 = 0
     for m in messages:
         try:
-            grammar2['RULE_0'].parse(m)
-            print('ok', m)
+            parser2.parse(m)
             soln2 += 1
-        except ParseError as pe2:
-            print('bad', m, print(pe2))
+        except: 
             pass
-
     print(f"The solution to part 2 is {soln2}.")
-    pyperclip.copy(soln1)
+    assert soln2 == 228
+    pyperclip.copy(soln2)
 
 
 if __name__ == '__main__':
